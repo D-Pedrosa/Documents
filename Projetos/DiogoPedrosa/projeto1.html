@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en" style="height: 100%;">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <title>Projeto 1 - API estilo "Tinder" para livros</title>
+        <link rel="shortcut icon" href="acceture.ico" type="image/x-icon">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+</head>
+
+<style>
+
+    body {
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-image: linear-gradient(#FD297B, #FF5864, #FF655B);
+    }
+    h1 {
+        margin-top:1.5rem;
+        color: #000000;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-family: 'Chalet NewYork';
+    }
+
+    div.text-center {
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    h3 {
+        margin-bottom: 1rem;
+        font-family: 'Chalet NewYork';
+    }
+
+    div.btn-group {
+        margin-top: 1.5rem;
+    }
+
+</style>
+
+<body>
+    
+    <h1>Projeto 1 - API estilo "Tinder" para livros</h1>
+
+    <div class="container text-center">
+        <!-- <div class="row"> -->
+            <!-- <div class="col align-self-start"> -->
+                <div class="text-center">
+                    <img class="img-fluid" src="" class="rounded" id="book1_image">
+                </div>
+                <!-- <div class="mb-3"> -->
+                    <h3 id="book1_title"></h3>
+                <!-- </div> -->
+                <div class="mb-3">
+                    <q id="book1_bio"></q>
+                </div>
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-primary" id="LikeBtn" onclick="addBooks()"
+                        style="border-color: #FFFFFF; background-color: #00fec0; color: #000000; font-family: 'Chalet NewYork';">ADICIONAR À ESTANTE</button>
+                    <div class="btn btn-primary" style="border-color: #FFFFFF;">
+                        <a id="book1_Link" href="" style="color: #FFFFFF;" target="_blank">COMPRE AQUI</a>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="DislikeBtn" onclick="rejectBooks()"
+                        style="border-color: #FFFFFF; background-color: #FD297B; color: #FFFFFF; font-family: 'Chalet NewYork';">ADICIONAR À PIRA</button>
+                </div>
+
+            <!-- </div> -->
+    
+            <!-- <div class="col align-self-center">
+                            <img src="" class="ms-3" id="book2_image">
+                            <h3 id="book2_title"></h3>
+                            <p id="book2_bio"></p>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn" id="LikeBtn" onclick="addBooks()">Adicionar à estante</button>
+                                <div class="btn">
+                                    <a id="book2_Link" href="" class="btn btn-primary" target="_blank">Compre aqui</a>
+                                </div>
+                                <button type="button" class="btn" id="DislikeBtn" onclick="rejectBooks()">Adicionar à pira</button>
+                            </div>
+                        </div> -->
+            
+            <!-- <div class="col align-self-center">
+                            <img src="" class="ms-3" id="book3_image">
+                            <h3 id="book3_title"></h3>
+                            <p id="book3_bio"></p>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn" id="LikeBtn" onclick="addBooks()">Adicionar à estante</button>
+                                <div class="btn">
+                                    <a id="book3_Link" href="" class="btn btn-primary" target="_blank">Compre aqui</a>
+                                </div>
+                                <button type="button" class="btn" id="DislikeBtn" onclick="rejectBooks()">Adicionar à pira</button>
+                            </div>
+                        </div> -->
+            <!-- </div> -->
+    </div>
+
+
+    <script>
+
+
+        let books = [] // arreio vazio de livros
+
+        let startLivro = 0; // contador de indice de arreio a começar no zero
+
+        let bookCase = [] // arreio vazio que será o depósito de livros gostados ou desgostados
+
+        let likedBooks = [] // arreio vazio de livros gostados
+
+        let dislikedBooks = [] // arreio vazio de livros desgostados
+
+        class MyBooks {
+            constructor(imagem, name, bio, hiperlink) {
+                this.imagem = imagem;
+                this.name = name;
+                this.bio = bio;
+                this.hiperlink = hiperlink;
+            } // cosntrutor de objetos da classe MyBooks
+        }
+
+        // Positive Law and Natural Law
+        let query = 'Sun Tzu'; // string para puxar uma query do API da Google
+
+        let startIndex = 0; // indice de coomeço do arreio de objetos que vão ser pedidos
+
+        const maxResults = 40; // o máximo que se pode pedir do arreio de dados a serem pedidos
+
+        let queryItems = 0; // 
+
+        function getData() { // Função para ir buscar os pacotes de dados à API da Google
+            if (startIndex > queryItems) {
+                return;
+            }
+
+            $.get(`https://www.googleapis.com/books/v1/volumes?q=${query}&startIndex=${startIndex}&maxResults=${maxResults}`)
+
+                .done(function (data) {
+
+                    console.log(data)
+
+                    data.items.forEach(element => {
+                        let haveTextSnippet = (element.searchInfo && element.searchInfo.textSnippet) ? element.searchInfo.textSnippet : "Sem sinopse"
+                        let haveImagem = (element.volumeInfo && element.volumeInfo.imageLinks && element.volumeInfo.imageLinks.smallThumbnail) ? element.volumeInfo.imageLinks.smallThumbnail : "Sem imagem";
+                        let haveTittle = element.volumeInfo.title
+                        let haveLink = element.volumeInfo.infoLink
+                        let bookFromGoogle = new MyBooks(haveImagem, haveTittle, haveTextSnippet, element.volumeInfo.infoLink)
+                        console.log(bookFromGoogle);
+                        books.push(bookFromGoogle) // cosntrução do objeto MyBooks e carregamento em arreio vazio books para apresentação
+                    })
+                    updateHTML() // função de chamada para atualização do indice do arreio
+                })
+                .fail(function (data) {
+                    console.log('Error:' + data);
+                });
+
+        }
+
+        function updateHTML() { // função de chamada para atualização do indice do arreio
+            initShowBookImageToUser()
+            initShowBookTittleToUser()
+            initShowBookBioToUser()
+            initShowBookHyperToUser()
+            startLivro++
+        }
+
+        function addBooks() { // função para responder ao click do botão de livros gostados
+            bookCase.push(books[startLivro]);
+            likedBooks.push(books[startLivro]);
+            updateHTML()
+        }
+
+        function rejectBooks() { // função para responder ao click do botão de livros desgostados
+            bookCase.push(books[startLivro]);
+            dislikedBooks.push(books[startLivro]);
+            updateHTML()
+        }
+
+        function initShowBookImageToUser() { // função para carregar dinamicamente a imagem do livro
+            $(`#book1_image`).attr("src", books[startLivro].imagem)
+            // $(`#book2_image`).attr("src", books[startLivro+1].imagem)
+            // $(`#book3_image`).attr("src", books[startLivro+2].imagem)
+        }
+
+        function initShowBookTittleToUser() { // função para carregar dinamicamente o titulo de livro
+            $(`#book1_title`).html(books[startLivro].name);
+            // $(`#book2_title`).html(books[startLivro+1].name);
+            // $(`#book3_title`).html(books[startLivro+2].name);
+        }
+
+        function initShowBookBioToUser() { // função para carregar dinamincamente a sinopse do livro
+            $(`#book1_bio`).html(books[startLivro].bio);
+            // $(`#book2_bio`).html(books[startLivro+1].bio);
+            // $(`#book3_bio`).html(books[startLivro+2].bio);
+        }
+
+        function initShowBookHyperToUser() { // função para carregar dinamicamente a hiperligação para o livro (e.g., loja)
+            $(`#book1_Link`).attr("href", books[startLivro].hyperlink);
+            // $(`#book2_Link`).attr("href", books[startLivro+1].hyperlink);
+            // $(`#book3_Link`).attr("href", books[startLivro+2].hyperlink);
+        }
+
+        getData() // chamada da função para ir buscar os pacotes de dados da API e correr a função updateHTML que atualiza o indice do arreio books no HTML
+    
+    </script>
+</body>
